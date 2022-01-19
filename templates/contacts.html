@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>My Contacts</title>
+{% endblock %}
+
+{% block body %}
+    <div class="contacts">
+      {% for contact in contacts %}
+      <div class="card">
+        <div class="card-image" style="background: url('{{ contact.image }}'); background-size: cover;"></div>
+        <div class="card-content">
+          <span>{{ contact.name }}</span>
+          <br>
+          <span>{{ contact.email }}</span>
+          <br>
+          <span>{{ contact.number }}</span>
+        </div>
+        <div class="card-buttons">
+          <div class="update"><a class="button-link" href="/update_contact/{{ contact.id }}">Update</a></div>
+          <div class="delete"><a class="button-link" href="/delete_contact/{{ contact.id }}">Delete</a></div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+
+    <div class="content">
+
+    <form class="contact-form" action="/contacts/" method="POST">
+      <h3 class="title">New Contact</h3>
+      <hr>
+      <p><input class="input-box" type="text" name="name" id="name" placeholder="Name"></p>
+      <p><input class="input-box" type="text" name="email" id="email" placeholder="Email"></p>
+      <p><input class="input-box" type="text" name="number" id="number" placeholder="Phone"></p>
+      <p><input class="input-box" type="text" name="image" id="image" placeholder="Image Url"></p>
+      <p><button type="submit" id="submit">Add Contact</p>
+    </form>
+    </div>
+{% endblock %}
