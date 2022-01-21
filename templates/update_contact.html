@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>Update Contact</title>
+  <title>Update Contact</title>
 {% endblock %}
 
 {% block body %}
-<h3>Update Contact</h3>
+  <h3>Update Contact</h3>
 
-    <form action="/update_contact/{{ contact.id }}" method="POST">
-      <p>Name: <input type="text" name="name" id="name" value="{{ contact.name }}"></p>
-      <p>Email: <input type="text" name="email" id="email" value="{{ contact.email }}"></p>
-      <p>Phone Number: <input type="text" name="number" id="number" value="{{ contact.number }}"></p>
-      <p>Image Url: <input type="text" name="image" id="image" value="{{ contact.image }}"></p>
-      <p><input type="submit" value="Update Contact"></p>
-    </form>
-    </div>
+  <form action="/update_contact/{{ contact.id }}" method="POST">
+    <p>Name: <input type="text" name="name" id="name" value="{{ contact.name }}"></p>
+    <p>Email: <input type="text" name="email" id="email" value="{{ contact.email }}"></p>
+    <p>Phone Number: <input type="text" name="number" id="number" value="{{ contact.number }}"></p>
+    <p>Image Url: <input type="text" name="image" id="image" value="{{ contact.image }}"></p>
+    <p><input type="submit" value="Update Contact"></p>
+  </form>
+  </div>
 {% endblock %}
