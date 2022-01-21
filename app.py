@@ -65,7 +65,7 @@ def contacts():
                 db.session.commit()
                 return redirect('/contacts/')
             except:
-                return 'Unable to add contact'       
+                return 'Unable to add contact'    
     else:
         contacts = Contact.query.order_by(Contact.name).all()
         return render_template('contacts.html', contacts=contacts, form=form)

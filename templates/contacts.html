@@ -5,33 +5,33 @@
 {% endblock %}
 
 {% block body %}
-    <div class="contacts">
-      {% for contact in contacts %}
-      <div class="card">
-        <div class="card-image" style="background: url('{{ contact.image }}'); background-size: cover;"></div>
-        <div class="card-content">
-          <span>{{ contact.name }}</span>
-          <br>
-          <span>{{ contact.email }}</span>
-          <br>
-          <span>{{ contact.number }}</span>
-        </div>
-        <div class="card-buttons">
-          <div class="update"><a class="button-link" href="/update_contact/{{ contact.id }}">Update</a></div>
-          <div class="delete"><a class="button-link" href="/delete_contact/{{ contact.id }}">Delete</a></div>
-        </div>
+  <div class="contacts">
+    {% for contact in contacts %}
+    <div class="card">
+      <div class="card-image" style="background: url('{{ contact.image }}'); background-size: cover;"></div>
+      <div class="card-content">
+        <span>{{ contact.name }}</span>
+        <br>
+        <span>{{ contact.email }}</span>
+        <br>
+        <span>{{ contact.number }}</span>
       </div>
-    {% endfor %}
+      <div class="card-buttons">
+        <div class="update"><a class="button-link" href="/update_contact/{{ contact.id }}">Update</a></div>
+        <div class="delete"><a class="button-link" href="/delete_contact/{{ contact.id }}">Delete</a></div>
+      </div>
     </div>
+  {% endfor %}
+  </div>
 
-    <form class="contact-form" action="/contacts/" method="POST">
-      {{ form.hidden_tag() }}
-      <h3 class="title">New Contact</h3>
-      <hr>
-      <p>{{ form.name(class="input-box", placeholder="Name") }}</p>
-      <p>{{ form.email(class="input-box", placeholder="Email") }}</p>
-      <p>{{ form.number(class="input-box", placeholder="Phone") }}</p>
-      <p>{{ form.image(class="input-box", placeholder="Image Url") }}</p>
-      <p>{{ form.submit(id="submit") }}</p>
-    </form>
+  <form class="contact-form" action="/contacts/" method="POST">
+    {{ form.hidden_tag() }}
+    <h3 class="title">New Contact</h3>
+    <hr>
+    <p>{{ form.name(class="input-box", placeholder="Name") }}</p>
+    <p>{{ form.email(class="input-box", placeholder="Email") }}</p>
+    <p>{{ form.number(class="input-box", placeholder="Phone") }}</p>
+    <p>{{ form.image(class="input-box", placeholder="Image Url") }}</p>
+    <p>{{ form.submit(id="submit") }}</p>
+  </form>
 {% endblock %}
