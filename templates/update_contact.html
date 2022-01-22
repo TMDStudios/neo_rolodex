@@ -5,6 +5,9 @@
 {% endblock %}
 
 {% block body %}
+  {% for message in get_flashed_messages() %}
+    <span class="alert">{{ message }}</span>
+  {% endfor %}
   <form class="contact-form" action="/update_contact/{{ contact.id }}" method="POST">
     <h3 class="title">Update Contact</h3>
     <hr>

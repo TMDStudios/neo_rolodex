@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, StringField, EmailField, SubmitField
@@ -85,6 +85,12 @@ def delete_contact(id):
 def update_contact(id):
     contact = Contact.query.get_or_404(id)
     if request.method == 'POST':
+        if len(request.form.get("name")) <= 0:
+            flash("Please enter a valid name")
+            return render_template('update_contact.html', contact=contact)
+        if len(request.form.get("email")) <= 0 or request.form.get("email").find('@') < 0:
+            flash("Please enter a valid email")
+            return render_template('update_contact.html', contact=contact)
         contact.name = request.form.get("name")
         contact.email = request.form.get("email")
         contact.number = request.form.get("number")
