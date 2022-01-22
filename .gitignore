@@ -1,5 +1,5 @@
 /venv
 /migrations
 /__pycache__
-contacts.db
+neo_rolodex.db
 .env

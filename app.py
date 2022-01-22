@@ -6,14 +6,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, Optional
+from wtforms.validators import DataRequired, Optional, EqualTo, Length
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import requests
 import os
 
 load_dotenv()
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URI")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -22,14 +23,25 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(200), nullable=False, unique=True)
-    password = db.Column(db.String(200), nullable=False)
+    password_hash = db.Column(db.String(200))
     image = db.Column(db.String(200))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __init__(self, name, email, number, image):
+    @property
+    def password(self):
+        raise AttributeError("Password is not a readable attribute")
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def __init__(self, name, email, password_hash, image):
         self.username = name
         self.email = email
-        self.password = number
+        self.password_hash = password_hash
         self.image = image
 
     def __repr__(self):
@@ -38,7 +50,7 @@ class User(db.Model):
 class UserForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired()])
     email = EmailField("Email", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired(), EqualTo("confirm_password", "Passwords must match")])
     confirm_password = PasswordField("Confirm Password", validators=[DataRequired()])
     image = StringField("Image", validators=[Optional()])
     submit = SubmitField("Sign Up")
@@ -53,29 +65,37 @@ def add_user():
             if user is None:
                 username = form.username.data
                 email = form.email.data
-                password = form.password.data
-                confirm_password = form.confirm_password.data
+                password = generate_password_hash(form.password.data, "sha256")
                 image = form.image.data
 
-                if password == confirm_password:
-                    try:
-                        if requests.get(image).status_code != 200:
-                            image = "https://tmdstudios.files.wordpress.com/2022/01/blank_profile.png"
-                    except:
+                try:
+                    if requests.get(image).status_code != 200:
                         image = "https://tmdstudios.files.wordpress.com/2022/01/blank_profile.png"
-                    new_user = User(username, email, password, image)
+                except:
+                    image = "https://tmdstudios.files.wordpress.com/2022/01/blank_profile.png"
+                new_user = User(username, email, password, image)
 
-                    try:
-                        db.session.add(new_user)
-                        db.session.commit()
-                        return redirect('/')
-                    except:
-                        return 'Unable to create new user'   
-                else:
-                    flash("Passwords do not match")
-                    return render_template('add_user.html', form=form)
-    else:
+                try:
+                    db.session.add(new_user)
+                    db.session.commit()
+                    return redirect('/')
+                except:
+                    return 'Unable to create new user'
+        flash("Passwords do not match")
         return render_template('add_user.html', form=form)
+
+    return render_template('add_user.html', form=form)
+
+@app.route('/delete_user/<int:id>')
+def delete_user(id):
+    user_to_delete = User.query.get_or_404(id)
+
+    try:
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        return redirect('/')
+    except:
+        return 'Unable to delete user'
 
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -130,9 +150,9 @@ def contacts():
                 return redirect('/contacts/')
             except:
                 return 'Unable to add contact'    
-    else:
-        contacts = Contact.query.order_by(Contact.name).all()
-        return render_template('contacts.html', contacts=contacts, form=form)
+
+    contacts = Contact.query.order_by(Contact.name).all()
+    return render_template('contacts.html', contacts=contacts, form=form)
 
 @app.route('/delete_contact/<int:id>')
 def delete_contact(id):
@@ -171,8 +191,8 @@ def update_contact(id):
             return redirect('/contacts/')
         except:
             return 'Unable to update contact'
-    else:
-        return render_template('update_contact.html', contact=contact)
+
+    return render_template('update_contact.html', contact=contact)
 
 @app.errorhandler(404)
 def page_not_found(e):

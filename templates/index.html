@@ -14,6 +14,6 @@
   <hr>
   <br>
   {% for user in users %}
-  <p>{{ user.username }} - {{ user.password }}</p>
+  <p>{{ user.username }} - {{ user.password_hash }} - <a href="/delete_user/{{ user.id }}">Delete</a></p>
   {% endfor %}
 {% endblock %}
