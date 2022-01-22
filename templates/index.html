@@ -7,4 +7,13 @@
 {% block body %}
   <p>This is just a place holder</p>
   <a href="/contacts/">My Contacts</a>
+  <br>
+  <a href="/add_user/">Add User</a>
+
+  <br>
+  <hr>
+  <br>
+  {% for user in users %}
+  <p>{{ user.username }} - {{ user.password }}</p>
+  {% endfor %}
 {% endblock %}

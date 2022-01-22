@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>Add User</title>
+{% endblock %}
+
+{% block body %}
+    {% for message in get_flashed_messages() %}
+    <span class="alert">{{ message }}</span>
+    {% endfor %}
+    <form class="contact-form" action="/add_user/" method="POST">
+    {{ form.hidden_tag() }}
+    <h3 class="title">New User</h3>
+    <hr>
+    <p>{{ form.username(class="input-box", placeholder="Username") }}</p>
+    <p>{{ form.email(class="input-box", placeholder="Email") }}</p>
+    <p>{{ form.password(class="input-box", placeholder="Password") }}</p>
+    <p>{{ form.confirm_password(class="input-box", placeholder="Confirm Password") }}</p>
+    <p>{{ form.image(class="input-box", placeholder="Image Url") }}</p>
+    <p>{{ form.submit(id="submit") }}</p>
+    </form>
+{% endblock %}
