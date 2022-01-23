@@ -2,9 +2,11 @@ from ast import Pass
 from enum import unique
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, flash
+import flask_login
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf import FlaskForm
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from wtforms import StringField, EmailField, SubmitField, PasswordField
 from wtforms.validators import DataRequired, Optional, EqualTo, Length
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -17,11 +19,18 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URI")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, render_as_batch=True)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
-class User(db.Model):
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(200), nullable=False)
+    username = db.Column(db.String(200), nullable=False, unique=True)
     email = db.Column(db.String(200), nullable=False, unique=True)
     password_hash = db.Column(db.String(200))
     image = db.Column(db.String(200))
@@ -97,6 +106,36 @@ def delete_user(id):
     except:
         return 'Unable to delete user'
 
+class UserLoginForm(FlaskForm):
+    username = StringField("Username", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired(), EqualTo("confirm_password", "Passwords must match")])
+    confirm_password = PasswordField("Confirm Password", validators=[DataRequired()])
+    submit = SubmitField("Log In")
+
+@app.route('/login/', methods=['POST', 'GET'])
+def login():
+    form = UserLoginForm()
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            user = User.query.filter_by(username=form.username.data).first()
+            if user:
+                if check_password_hash(user.password_hash, form.password.data):
+                    login_user(user)
+                    return redirect('/')
+                else:
+                    flash("Wrong password")
+            else:
+                flash("User does not exist")
+
+    return render_template('login.html', form=form)
+
+@app.route('/logout/', methods=['POST', 'GET'])
+@login_required
+def logout():
+    logout_user()
+    return redirect('/login/')
+
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
@@ -127,6 +166,7 @@ def index():
     return render_template('index.html', users=users)
 
 @app.route('/contacts/', methods=['POST', 'GET'])
+@login_required
 def contacts():
     form = ContactForm()
 
