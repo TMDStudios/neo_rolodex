@@ -5,15 +5,22 @@
 {% endblock %}
 
 {% block body %}
+  {% if logged_in %}
+  <p>Logged in as {{ current_user }}</p>
+  {% endif %}
   <p>This is just a place holder</p>
   <a href="/contacts/">My Contacts</a>
   <br>
   <a href="/add_user/">Add User</a>
+  <br>
+  <a href="/login/">Log In</a>
+  <br>
+  <a href="/logout/">Log Out</a>
 
   <br>
   <hr>
   <br>
   {% for user in users %}
-  <p>{{ user.username }} - {{ user.password }}</p>
+  <p>{{ user.username }} - {{ user.password_hash }} - <a href="/delete_user/{{ user.id }}">Delete</a></p>
   {% endfor %}
 {% endblock %}
