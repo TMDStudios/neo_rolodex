@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Bookmarks</title>
+{% endblock %}
+
+{% block body %}
+  <form class="contact-form" action="/bookmarks/" method="POST">
+    {{ form.hidden_tag() }}
+    <h3 class="title">New Bookmark</h3>
+    <hr>
+    <p>{{ form.name(class="input-box", placeholder="Name") }}</p>
+    <p>{{ form.url(class="input-box", placeholder="URL") }}</p>
+    <p>{{ form.description(class="input-box", rows="5", placeholder="Description") }}</p>
+    <p>{{ form.submit(id="submit") }}</p>
+  </form>
+  <hr>
+  <h4>My Bookmarks</h4>
+  {% for bookmark in bookmarks %}
+  <p><a href="{{ bookmark.url }}">{{ bookmark.name }}</a> - {{ bookmark.description }}</p>
+  {% endfor %}
+{% endblock %}

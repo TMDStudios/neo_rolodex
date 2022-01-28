@@ -7,8 +7,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf import FlaskForm
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+from sqlalchemy import desc
 from wtforms import StringField, EmailField, SubmitField, PasswordField
 from wtforms.validators import DataRequired, Optional, EqualTo, Length
+from wtforms.widgets import TextArea
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import requests
@@ -136,6 +138,24 @@ def logout():
     logout_user()
     return redirect('/login/')
 
+class Bookmark(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    url = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(500))
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __init__(self, name, url, description):
+        self.name = name
+        self.url = url
+        self.description = description
+
+class BookmarkForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()])
+    url = StringField("URL", validators=[DataRequired()])
+    description = StringField("Description", validators=[Optional()], widget=TextArea())
+    submit = SubmitField("Add Bookmark")
+
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
@@ -159,6 +179,29 @@ class ContactForm(FlaskForm):
     number = StringField("Number", validators=[Optional()])
     image = StringField("Image", validators=[Optional()])
     submit = SubmitField("Add Contact")
+
+@app.route('/bookmarks/', methods=['POST', 'GET'])
+@login_required
+def bookmarks():
+    form = BookmarkForm()
+    
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            name = form.name.data
+            url = form.url.data
+            description = form.description.data
+
+            new_bookmark = Bookmark(name, url, description)
+
+            try:
+                db.session.add(new_bookmark)
+                db.session.commit()
+                return redirect('/bookmarks/')
+            except:
+                return 'Unable to add bookmark'    
+
+    bookmarks = Bookmark.query.order_by(Bookmark.date_created).all()
+    return render_template('bookmarks.html', bookmarks=bookmarks, form=form)
 
 @app.route('/')
 def index():
