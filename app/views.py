@@ -1,27 +1,11 @@
-from ast import Pass
-from enum import unique
-from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, flash
-import flask_login
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_wtf import FlaskForm
-from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
-from sqlalchemy import desc
-from wtforms import StringField, EmailField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, Optional, EqualTo, Length
-from wtforms.widgets import TextArea
+from app import app
+from forms import BookmarkForm, ContactForm, UserForm, UserLoginForm
+from models import db, Bookmark, Contact, User
+from flask import render_template, request, redirect, flash
+from flask_login import login_user, LoginManager, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
 import requests
-import os
 
-load_dotenv()
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URI")
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-db = SQLAlchemy(app)
-migrate = Migrate(app, db, render_as_batch=True)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -30,41 +14,10 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(200), nullable=False, unique=True)
-    email = db.Column(db.String(200), nullable=False, unique=True)
-    password_hash = db.Column(db.String(200))
-    image = db.Column(db.String(200))
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
-
-    @property
-    def password(self):
-        raise AttributeError("Password is not a readable attribute")
-
-    @password.setter
-    def password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def verify_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
-    def __init__(self, name, email, password_hash, image):
-        self.username = name
-        self.email = email
-        self.password_hash = password_hash
-        self.image = image
-
-    def __repr__(self):
-        return f'<User {self.id}>'
-
-class UserForm(FlaskForm):
-    username = StringField("Username", validators=[DataRequired()])
-    email = EmailField("Email", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired(), EqualTo("confirm_password", "Passwords must match")])
-    confirm_password = PasswordField("Confirm Password", validators=[DataRequired()])
-    image = StringField("Image", validators=[Optional()])
-    submit = SubmitField("Sign Up")
+@app.route('/')
+def index():
+    users = User.query.order_by(User.username).all()
+    return render_template('index.html', users=users)
 
 @app.route('/add_user/', methods=['POST', 'GET'])
 def add_user():
@@ -108,12 +61,6 @@ def delete_user(id):
     except:
         return 'Unable to delete user'
 
-class UserLoginForm(FlaskForm):
-    username = StringField("Username", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired(), EqualTo("confirm_password", "Passwords must match")])
-    confirm_password = PasswordField("Confirm Password", validators=[DataRequired()])
-    submit = SubmitField("Log In")
-
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     form = UserLoginForm()
@@ -138,52 +85,11 @@ def logout():
     logout_user()
     return redirect('/login/')
 
-class Bookmark(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
-    url = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.String(500))
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __init__(self, name, url, description):
-        self.name = name
-        self.url = url
-        self.description = description
-
-class BookmarkForm(FlaskForm):
-    name = StringField("Name", validators=[DataRequired()])
-    url = StringField("URL", validators=[DataRequired()])
-    description = StringField("Description", validators=[Optional()], widget=TextArea())
-    submit = SubmitField("Add Bookmark")
-
-class Contact(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
-    email = db.Column(db.String(200), nullable=False)
-    number = db.Column(db.String(200))
-    image = db.Column(db.String(200))
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __init__(self, name, email, number, image):
-        self.name = name
-        self.email = email
-        self.number = number
-        self.image = image
-
-    def __repr__(self):
-        return f'<Contact {self.id}>'
-
-class ContactForm(FlaskForm):
-    name = StringField("Name", validators=[DataRequired()])
-    email = EmailField("Email", validators=[DataRequired()])
-    number = StringField("Number", validators=[Optional()])
-    image = StringField("Image", validators=[Optional()])
-    submit = SubmitField("Add Contact")
-
 @app.route('/bookmarks/', methods=['POST', 'GET'])
 @login_required
 def bookmarks():
     form = BookmarkForm()
+    # id = current_user.id
     
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -202,11 +108,6 @@ def bookmarks():
 
     bookmarks = Bookmark.query.order_by(Bookmark.date_created).all()
     return render_template('bookmarks.html', bookmarks=bookmarks, form=form)
-
-@app.route('/')
-def index():
-    users = User.query.order_by(User.username).all()
-    return render_template('index.html', users=users)
 
 @app.route('/contacts/', methods=['POST', 'GET'])
 @login_required
@@ -237,17 +138,6 @@ def contacts():
     contacts = Contact.query.order_by(Contact.name).all()
     return render_template('contacts.html', contacts=contacts, form=form)
 
-@app.route('/delete_contact/<int:id>')
-def delete_contact(id):
-    contact_to_delete = Contact.query.get_or_404(id)
-
-    try:
-        db.session.delete(contact_to_delete)
-        db.session.commit()
-        return redirect('/contacts/')
-    except:
-        return 'Unable to delete contact'
-
 @app.route('/update_contact/<int:id>', methods=['POST', 'GET'])
 def update_contact(id):
     contact = Contact.query.get_or_404(id)
@@ -277,6 +167,17 @@ def update_contact(id):
 
     return render_template('update_contact.html', contact=contact)
 
+@app.route('/delete_contact/<int:id>')
+def delete_contact(id):
+    contact_to_delete = Contact.query.get_or_404(id)
+
+    try:
+        db.session.delete(contact_to_delete)
+        db.session.commit()
+        return redirect('/contacts/')
+    except:
+        return 'Unable to delete contact'
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
@@ -284,6 +185,3 @@ def page_not_found(e):
 @app.errorhandler(500)
 def server_not_found(e):
     return render_template("500.html"), 500
-
-if __name__ == "__main__":
-    app.run(debug=True)
