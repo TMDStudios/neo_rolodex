@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block body %}
+  <h1 class="home_title">Neo Rolodex</h1>
   {% if logged_in %}
   <p>Logged in as {{ current_user }}</p>
   {% endif %}
@@ -21,7 +22,7 @@
   <a href="/add_user/">Add User</a>
   <br>
   {% endif %}
-
+  <br>
   <br>
   <hr>
   <br>

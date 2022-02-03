@@ -144,3 +144,34 @@
     margin-left: auto;
     margin-right: auto;
 }
+.home_image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.home_title {
+    padding-top: 10px;
+    color: rgb(34, 34, 34);
+    font-variant-caps: small-caps;
+    text-align: center;
+}
+.navbar {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+.nav_item {
+    float: left;
+}
+.nav_link {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+.nav_link:hover {
+    background-color: #111;
+}

@@ -11,9 +11,14 @@
     {% endblock %}
 </head>
 <body>
+    <ul class="navbar">
+        <li class="nav_item"><a class="nav_link" href="/">Home</a></li>
+        <li class="nav_item"><a class="nav_link" href="/bookmarks/">Bookmarks</a></li>
+        <li class="nav_item"><a class="nav_link" href="/contacts/">Contacts</a></li>
+        <li class="nav_item"><a class="nav_link" href="/login/">Log In</a></li>
+        <li class="nav_item"><a class="nav_link" href="/logout/">Log Out</a></li>
+    </ul>
     {% block body %}
     {% endblock %}
-    <hr>
-    <p>Temp Link: <a href="/">Home</a></p>
 </body>
 </html>

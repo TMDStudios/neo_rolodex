@@ -1,6 +1,6 @@
 from app import app
-from forms import BookmarkForm, ContactForm, UserForm, UserLoginForm
-from models import db, Bookmark, Contact, User
+from .forms import BookmarkForm, ContactForm, UserForm, UserLoginForm
+from .models import db, Bookmark, Contact, User
 from flask import render_template, request, redirect, flash
 from flask_login import login_user, LoginManager, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
