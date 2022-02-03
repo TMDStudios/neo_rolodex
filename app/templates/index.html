@@ -6,27 +6,10 @@
 
 {% block body %}
   <h1 class="home_title">Neo Rolodex</h1>
-  {% if logged_in %}
-  <p>Logged in as {{ current_user }}</p>
-  {% endif %}
-  <p>This is just a place holder</p>
-  <a href="/contacts/">My Contacts</a>
-  <br>
-  <a href="/bookmarks/">My Bookmarks</a>
-  <br>
-  {% if current_user.is_authenticated %}
-  <a href="/login/">Log In</a>
-  <br>
-  <a href="/logout/">Log Out</a>
-  {% else %}
-  <a href="/add_user/">Add User</a>
-  <br>
-  {% endif %}
-  <br>
-  <br>
-  <hr>
-  <br>
-  {% for user in users %}
+  <img class="home_bg" src="https://tmdstudios.files.wordpress.com/2022/02/rolodex.jpg" alt="Rolodex">
+  
+  <!-- For Admin Only -->
+  <!-- {% for user in users %}
   <p>{{ user.username }} - {{ user.password_hash }} - <a href="/delete_user/{{ user.id }}">Delete</a></p>
-  {% endfor %}
+  {% endfor %} -->
 {% endblock %}
