@@ -11,12 +11,9 @@
     <hr>
     <p>{{ form.name(class="input-box", placeholder="Name") }}</p>
     <p>{{ form.url(class="input-box", placeholder="URL") }}</p>
-    <p>{{ form.description(class="input-box", rows="5", placeholder="Description") }}</p>
+    <p>{{ form.description(class="large-input-box", rows="5", placeholder="Description") }}</p>
     <p>{{ form.submit(id="submit") }}</p>
   </form>
   <hr>
-  <h4>My Bookmarks</h4>
-  {% for bookmark in bookmarks %}
-  <p><a href="{{ bookmark.url }}">{{ bookmark.name }}</a> - {{ bookmark.description }}</p>
-  {% endfor %}
+  <iframe class="frame" src="/bookmarks_frame/" title="Bookmarks Iframe"></iframe>
 {% endblock %}

@@ -109,6 +109,12 @@ def bookmarks():
     bookmarks = Bookmark.query.order_by(Bookmark.date_created).all()
     return render_template('bookmarks.html', bookmarks=bookmarks, form=form)
 
+@app.route('/bookmarks_frame/')
+@login_required
+def bookmarks_frame():
+    bookmarks = Bookmark.query.order_by(Bookmark.date_created).all()
+    return render_template('bookmarks_frame.html', bookmarks=bookmarks)
+
 @app.route('/contacts/', methods=['POST', 'GET'])
 @login_required
 def contacts():
