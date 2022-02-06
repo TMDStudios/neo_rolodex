@@ -115,6 +115,17 @@ def bookmarks_frame():
     bookmarks = Bookmark.query.order_by(Bookmark.date_created).all()
     return render_template('bookmarks_frame.html', bookmarks=bookmarks)
 
+@app.route('/delete_bookmark/<int:id>')
+def delete_bookmark(id):
+    bookmark_to_delete = Bookmark.query.get_or_404(id)
+
+    try:
+        db.session.delete(bookmark_to_delete)
+        db.session.commit()
+        return redirect('/bookmarks_frame/')
+    except:
+        return 'Unable to delete bookmark'
+
 @app.route('/contacts/', methods=['POST', 'GET'])
 @login_required
 def contacts():

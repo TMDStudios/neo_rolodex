@@ -10,7 +10,7 @@
 <body>
     <h4 class="bookmarks">My Bookmarks</h4>
     {% for bookmark in bookmarks %}
-    <p class="bookmarks bookmark"><a href="{{ bookmark.url }}">{{ bookmark.name }}</a> - {{ bookmark.description }}</p>
+    <p class="bookmarks bookmark"><a href="{{ bookmark.url }}">{{ bookmark.name }}</a> - {{ bookmark.description }} - <a href="/delete_bookmark/{{ bookmark.id }}">Delete</a></p>
     {% endfor %}
 </body>
 </html>
