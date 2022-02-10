@@ -2,7 +2,7 @@ from app import app
 from .forms import BookmarkForm, ContactForm, UserForm, UserLoginForm
 from .models import db, Bookmark, Contact, User
 from flask import render_template, request, redirect, flash
-from flask_login import login_user, LoginManager, login_required, logout_user
+from flask_login import current_user, login_user, LoginManager, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
 
@@ -42,7 +42,7 @@ def add_user():
                 try:
                     db.session.add(new_user)
                     db.session.commit()
-                    return redirect('/')
+                    return redirect('/login/')
                 except:
                     return 'Unable to create new user'
         flash("Passwords do not match")
@@ -93,11 +93,12 @@ def bookmarks():
     
     if request.method == 'POST':
         if form.validate_on_submit():
+            user_id = current_user.id
             name = form.name.data
             url = form.url.data
             description = form.description.data
 
-            new_bookmark = Bookmark(name, url, description)
+            new_bookmark = Bookmark(user_id, name, url, description)
 
             try:
                 db.session.add(new_bookmark)
@@ -112,7 +113,7 @@ def bookmarks():
 @app.route('/bookmarks_frame/')
 @login_required
 def bookmarks_frame():
-    bookmarks = Bookmark.query.order_by(Bookmark.date_created).all()
+    bookmarks = Bookmark.query.filter_by(user_id=current_user.id).order_by(Bookmark.date_created).all()
     return render_template('bookmarks_frame.html', bookmarks=bookmarks)
 
 @app.route('/delete_bookmark/<int:id>')
@@ -133,6 +134,7 @@ def contacts():
 
     if request.method == 'POST':
         if form.validate_on_submit():
+            user_id = current_user.id
             name = form.name.data
             email = form.email.data
             number = form.number.data
@@ -143,7 +145,7 @@ def contacts():
                     image = "https://tmdstudios.files.wordpress.com/2022/01/blank_profile.png"
             except:
                 image = "https://tmdstudios.files.wordpress.com/2022/01/blank_profile.png"
-            new_contact = Contact(name, email, number, image)
+            new_contact = Contact(user_id, name, email, number, image)
 
             try:
                 db.session.add(new_contact)
@@ -152,7 +154,7 @@ def contacts():
             except:
                 return 'Unable to add contact'    
 
-    contacts = Contact.query.order_by(Contact.name).all()
+    contacts = Contact.query.filter_by(user_id=current_user.id).order_by(Contact.name).all()
     return render_template('contacts.html', contacts=contacts, form=form)
 
 @app.route('/update_contact/<int:id>', methods=['POST', 'GET'])
