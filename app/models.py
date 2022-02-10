@@ -10,25 +10,29 @@ migrate = Migrate(app, db, render_as_batch=True)
 
 class Bookmark(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     name = db.Column(db.String(200), nullable=False)
     url = db.Column(db.String(200), nullable=False)
     description = db.Column(db.String(500))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __init__(self, name, url, description):
+    def __init__(self, user_id, name, url, description):
+        self.user_id = user_id
         self.name = name
         self.url = url
         self.description = description
 
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(200), nullable=False)
     number = db.Column(db.String(200))
     image = db.Column(db.String(200))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __init__(self, name, email, number, image):
+    def __init__(self, user_id, name, email, number, image):
+        self.user_id = user_id
         self.name = name
         self.email = email
         self.number = number
@@ -39,6 +43,8 @@ class Contact(db.Model):
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
+    bookmarks = db.relationship('Bookmark', backref='user')
+    contacts = db.relationship('Contact', backref='user')
     username = db.Column(db.String(200), nullable=False, unique=True)
     email = db.Column(db.String(200), nullable=False, unique=True)
     password_hash = db.Column(db.String(200))
